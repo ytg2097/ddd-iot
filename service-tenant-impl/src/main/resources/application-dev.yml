@@ -1,0 +1,132 @@
+server:
+  port: 8765
+
+#eureka:
+#
+#  instance:
+#
+#    prefer-ip-address: true
+#  client:
+#    service-url:
+#      defaultZone: http://127.0.0.1:8760/eureka
+#      tow: http://127.0.0.1:8761/eureka
+#      three: http://127.0.0.1:8762/eureka
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 2000
+        readTimeout: 5000
+
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: service-tenant
+#    生产环境关闭swagger
+    swagger:
+      enable: true
+      scan-package: io.ac.iot
+      headers:
+        - name: operatorToken
+          desc: operator token
+          type: string
+          require: false
+        - name: operatorId
+          desc: operator id
+          type: string
+          require: false
+        - name: tid
+          desc: tenant id
+          type: string
+          require: false
+
+  datasource:
+    url: jdbc:mysql://47.116.19.68:3306/service-tenant?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    username: root
+    password: anchangiot
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+#      生产环境改为none  b4c76de512f74f129e00934846720334  fff8ce8e14cb426ca0bd8bfd7104bbc9
+      ddl-auto: update
+    open-in-view: true
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+
+  redis:
+    host: 47.116.19.68
+    port: 6379
+    timeout: 5000
+    password: anchangiot
+    database: 2
+
+
+  cloud:
+#    提供event bus 消息通道
+#    为保证消息代理中间件的兼容性使用stream  若不稳定更换为kafka  稳定第一, 兼容第二
+    stream:
+#      预计启动服务实例的数量
+      instanceCount: 2
+      dynamic-destinations:
+
+      kafka:
+        binder:
+          brokers: 47.116.19.68:9092
+          auto-create-topics: true
+    nacos:
+      discovery:
+        server-addr: 192.168.120.25:8848
+#    alibaba:
+#      seata:
+#        tx-service-group: ${spring.application.name}-seata-service-group
+#
+#seata:
+#  registry:
+#    type: nacos
+#    nacos:
+#      application: seata-server
+#      server-addr: 192.168.120.25:8848
+##      namespace: lp
+#  config:
+#    type: nacos
+#    nacos:
+#
+#      server-addr: 192.168.120.25:8848
+#      group : "SEATA_GROUP"
+#      username: "nacos"
+#      password: "nacos"
+#      namespace: seata
+
+seata:
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      server-addr: 192.168.120.25:8848
+
+  config:
+    type: nacos
+    nacos:
+      server-addr: 192.168.120.25:8848
+      group : "SEATA_GROUP"
+      username: "nacos"
+      password: "nacos"
+
+
+
+
+
+logging:
+  level:
+    com.netflix.discovery: WARN
+    org.apache.kafka.clients: WARN
+
+
+ac:
+  web:
+    cors:
+      enable: false

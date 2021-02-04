@@ -1,0 +1,63 @@
+version: "3.7"
+##  有需要时编写
+services:
+
+  eureka:
+    entrypoint: java -jar infrastructure-eureka-server.jar
+    image: ac-cloud/infrastructure-eureka-server:0.0.1-SNAPSHOT
+    volumes:
+      - /dockerdata/logs:/data/logs
+    ports:
+      - 8760:8760
+    networks:
+      - ac-cloud
+
+  api-gateway-platform:
+    entrypoint: ./wait-for-it.sh eureka:8760 'java -jar api-gateway-platform.jar'
+    image: ac-cloud/api-gateway-platform:0.0.1-SNAPSHOT
+    ports:
+      - 8750:8750
+    networks:
+      - ac-cloud
+    depends_on:
+      - redis
+      - eureka
+      - mysql
+
+  service-tenant:
+    image: ac-cloud/service-tenant:0.0.1-SNAPSHOT
+    volumes:
+      - /dockerdata/logs:/data/logs
+      - /dockerdata/wait-for-it.sh:/wait-for-it.sh
+    ports:
+      - 8765:8765
+    networks:
+      - ac-cloud
+    depends_on:
+      - redis
+      - eureka
+      - mysql
+
+  service-backed-config:
+
+    entrypoint: ./wait-for-it.sh eureka:8760 mysql:3307 redis:6378 'java -jar service-backed-config.jar'
+    image: ac-cloud/service-backed-config:0.0.1-SNAPSHOT
+    volumes:
+      - /dockerdata/logs:/data/logs
+      - /dockerdata/wait-for-it.sh:/wait-for-it.sh
+    ports:
+      -  8763:8763
+    depends_on:
+      - redis
+      - eureka
+      - mysql
+    networks:
+      - ac-cloud
+
+###   ....
+
+
+networks:
+  scaffold-cloud:
+    name: ac-cloud
+    driver: bridge

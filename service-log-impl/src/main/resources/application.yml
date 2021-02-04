@@ -1,0 +1,99 @@
+server:
+  port: 8762
+
+eureka:
+
+  instance:
+
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8760/eureka
+
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 10000
+        readTimeout: 600000
+
+spring:
+  datasource:
+    url: jdbc:mysql://47.116.19.68:3306/service-log?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    username: root
+    password: anchangiot
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    mongodb:
+      uri: mongodb://admin:123456@139.129.90.159:27017/ac-cloud
+      
+      option:
+      min-connection-per-host: 0
+      max-connection-per-host: 100
+      threads-allowed-to-block-for-connection-multiplier: 5
+      server-selection-timeout: 30000
+      max-wait-time: 120000
+      max-connection-idle-time: 0
+      max-connection-life-time: 0
+      connect-timeout: 10000
+      socket-keep-alive: false
+      ssl-enabled: false
+      ssl-invalid-host-name-allowed: false
+      heartbeat-socket-timeout: 20000
+      heartbeat-connect-timeout: 20000
+      min-heartbeat-frequency: 500
+      heartbeat-frequency: 10000
+      local-threshold: 15      
+
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: service-log
+#    生产环境关闭swagger
+    swagger:
+      enable: true
+      scan-package: io.ac.iot
+      headers:
+        - name: operatorToken
+          desc: operator token
+          type: string
+          require: false
+        - name: operatorId
+          desc: operator id
+          type: string
+          require: false
+        - name: tid
+          desc: tenant id
+          type: string
+          require: false
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: 47.116.19.68:9092
+          auto-create-topics: true
+        bindings:
+          tenant-operation-log:
+            destination: tenant-operation-log
+            group: ${spring.application.name}
+
+
+  redis:
+    host: 47.116.19.68
+    port: 6379
+    timeout: 5000
+    password: anchangiot
+    database: 2
+
+logging:
+  level:
+    com.netflix.discovery: WARN
+#    org.apache.kafka.clients: WARN
+
+ac:
+  web:
+    cors:
+      enable: false
+

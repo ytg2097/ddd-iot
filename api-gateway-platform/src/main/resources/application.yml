@@ -1,0 +1,107 @@
+server:
+  port: 8750
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: api-gateway-platform
+  redis:
+    host: 47.116.19.68
+    port: 6379
+    timeout: 60000
+    password: anchangiot
+    database: 2
+    lettuce:
+      pool:
+        max-idle: 30
+        max-active: 8
+        max-wait: 10000
+        min-idle: 10
+  cloud:
+    gateway:
+
+      discovery:
+        locator:
+          enabled: true
+          lowerCaseServiceId: true
+      routes:
+
+      - id: service-tenant
+        uri: lb://service-tenant
+        predicates:
+        - Path=/service-tenant/**
+        filters:
+        - SwaggerHeaderFilter
+        - StripPrefix=1
+
+      - id: service-log
+        uri: lb://service-log
+        predicates:
+          - Path=/service-log/**
+        filters:
+          - SwaggerHeaderFilter
+          - StripPrefix=1
+
+      - id: service-device
+        uri: lb://service-device
+        predicates:
+        - Path=/service-device/**
+        filters:
+        - SwaggerHeaderFilter
+        - StripPrefix=1
+
+      - id: service-device-data
+        uri: lb://service-device-data
+        predicates:
+        - Path=/service-device-data/**
+        filters:
+        - SwaggerHeaderFilter
+        - StripPrefix=1
+
+      - id: service-order
+        uri: lb://service-order
+        predicates:
+        - Path=/service-order/**
+        filters:
+        - SwaggerHeaderFilter
+        - StripPrefix=1
+
+      - id: service-report
+        uri: lb://service-report
+        predicates:
+          - Path=/service-report/**
+        filters:
+          - SwaggerHeaderFilter
+          - StripPrefix=1
+
+      x-forwarded:
+        prefix-append: false
+
+hystrix.command.fallbackcmd.executiodn.isolation.thread.timeoutInMilliseconds: 10000
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 60000
+        readTimeout: 60000
+eureka:
+  instance:
+    prefer-ip-address: true
+  #    lease-expiration-duration-in-seconds: 10
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8760/eureka
+#      开发测试环境调低, 快速所获server的client注册列表
+    registry-fetch-interval-seconds: 5
+
+
+gateway:
+  white-list: /auth/login,/auth/logout
+  auth: true
+
+logging:
+  level:
+    root: info
+    com.netflix.discovery.DiscoveryClient: error
